@@ -1,0 +1,69 @@
+{
+  "starting": {
+    "date": "2026-08-10",
+    "imoex": 2295.96,
+    "brent": 79.7,
+    "usdrub": 81.4077,
+    "ofz5y": 15.36,
+    "fair_A": 2449.0054084082694,
+    "fair_B": 2759.380687819133,
+    "dev_A_pct": -6.2492882981316615,
+    "dev_B_pct": -16.79437309483368
+  },
+  "reversion": {
+    "gamma": 0.0027727882805249487,
+    "half_life_days": 249.98200743574895,
+    "reversion_3m": 16.027906423823033,
+    "reversion_6m": 29.486875004337797,
+    "reversion_12m": 50.27899203346118
+  },
+  "scenarios_6m": [
+    {
+      "name": "Пессимистичный",
+      "brent": 55,
+      "usdrub": 100,
+      "ofz5y": 17.0,
+      "return_6m_A_ecm": -8.12,
+      "return_6m_A_full": -3.89,
+      "return_6m_B_ecm": 5.98,
+      "return_6m_B_full": 20.22
+    },
+    {
+      "name": "Базовый",
+      "brent": 68,
+      "usdrub": 92,
+      "ofz5y": 14.0,
+      "return_6m_A_ecm": 6.56,
+      "return_6m_A_full": 11.48,
+      "return_6m_B_ecm": 2.94,
+      "return_6m_B_full": 16.77
+    },
+    {
+      "name": "Оптимистичный",
+      "brent": 80,
+      "usdrub": 85,
+      "ofz5y": 12.0,
+      "return_6m_A_ecm": 17.71,
+      "return_6m_A_full": 23.14,
+      "return_6m_B_ecm": 1.0,
+      "return_6m_B_full": 14.57
+    },
+    {
+      "name": "Статус-кво",
+      "brent": 79.7,
+      "usdrub": 81.4077,
+      "ofz5y": 15.36,
+      "return_6m_A_ecm": 2.54,
+      "return_6m_A_full": 7.27,
+      "return_6m_B_ecm": 6.36,
+      "return_6m_B_full": 20.64
+    }
+  ],
+  "ofz_carry_6m_pct": 7.405772656780418,
+  "weights": {
+    "Пессимистичный": 0.2,
+    "Базовый": 0.5,
+    "Оптимистичный": 0.2,
+    "Статус-кво": 0.1
+  }
+}
