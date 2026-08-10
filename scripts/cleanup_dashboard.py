@@ -106,6 +106,26 @@ html = re.sub(
 # ================================================================
 # 9. Удаляем ссылки в навигации на убранные секции
 # ================================================================
+# ================================================================
+# 8b. Убираем scatter график изменения синт. индекса внутри блока synth
+# ================================================================
+print("\n[8b] Убираем график 'synth_scatter' (изменение синт. индекса за 20 дней)")
+# Сначала убираем обертку с chart-container
+html = re.sub(
+    r'<div class="chart-container">[^<]*<div[^>]*id="synth_scatter"[^>]*>.*?</div>\s*</div>\s*</div>',
+    '', html, flags=re.DOTALL, count=1)
+# Fallback: весь div с synth_scatter
+html = re.sub(
+    r'<div[^>]*id="synth_scatter"[^>]*>.*?</div>(\s*</div>)?',
+    '', html, flags=re.DOTALL, count=1)
+# Убираем h3 заголовок scatter, если остался
+html = re.sub(
+    r'<h[34][^>]*>[^<]*Изменение синт[^<]*</h[34]>',
+    '', html, flags=re.IGNORECASE)
+html = re.sub(
+    r'<h[34][^>]*>[^<]*Scatter[^<]*</h[34]>',
+    '', html, flags=re.IGNORECASE)
+
 print("\n[9] Чистим навигацию")
 for nav_text in ["Очистка USD/RUB", "Результаты моделей", "fx-cleanup"]:
     html = re.sub(

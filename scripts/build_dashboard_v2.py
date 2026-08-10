@@ -333,7 +333,6 @@ for r in scen["scenarios_6m"]:
 <td>${r['brent']:.0f}</td><td>{r['usdrub']:.0f}</td><td>{r['ofz5y']:.1f}%</td>
 <td>{r['return_6m_A_ecm']:+.1f}%</td>
 <td>{r['return_6m_A_full']:+.1f}%</td>
-<td>{r['return_6m_B_ecm']:+.1f}%</td>
 </tr>"""
 
 scenario_html = f"""
@@ -354,7 +353,7 @@ scenario_html = f"""
 <h3>Именованные сценарии (горизонт 6 месяцев)</h3>
 <table>
 <tr><th>Сценарий</th><th>Brent</th><th>USD/RUB</th><th>ОФЗ 5Y</th>
-    <th>Мод A + ECM</th><th>Мод A + full reversion</th><th>Мод B + ECM</th></tr>
+    <th>Мод A + ECM</th><th>Мод A + full reversion</th></tr>
 {named_scen_rows}
 </table>
 <p>Столбец «ECM» — реалистичный (26% отклонения за 6М). «Full reversion» — верхняя граница upside.
@@ -398,22 +397,13 @@ interactive_html = f"""
     <div class="result-value">{scen['starting']['imoex']:,.0f}</div>
   </div>
   <div class="result-card">
-    <div class="result-label">Fair value (A) на конец периода</div>
+    <div class="result-label">Fair value на конец периода</div>
     <div class="result-value" id="fair-A">—</div>
   </div>
-  <div class="result-card">
-    <div class="result-label">Fair value (B) на конец периода</div>
-    <div class="result-value" id="fair-B">—</div>
-  </div>
   <div class="result-card highlight-card">
-    <div class="result-label">Прогноз IMOEX (модель A)</div>
+    <div class="result-label">Прогноз IMOEX</div>
     <div class="result-value" id="imoex-proj-A">—</div>
     <div class="result-sub" id="ret-A">—</div>
-  </div>
-  <div class="result-card highlight-card">
-    <div class="result-label">Прогноз IMOEX (модель B)</div>
-    <div class="result-value" id="imoex-proj-B">—</div>
-    <div class="result-sub" id="ret-B">—</div>
   </div>
   <div class="result-card">
     <div class="result-label">Реверсия отклонения</div>
@@ -438,27 +428,18 @@ function project(brent, usdrub, ofz, days) {{
   const brent_rub_ma3m = (M.current.brent_rub_ma3m_now + brent_rub) / 2;
   const log_oil = Math.log(brent_rub_ma3m);
 
-  // Модель A
+  // Модель A (единственная — экономически корректная)
   const log_fair_A = M.model_A.const + M.model_A.b_oil * log_oil + M.model_A.b_ofz * ofz;
   const fair_A = Math.exp(log_fair_A);
-
-  // Модель B (post-2022 режим)
-  const log_fair_B = M.model_B.const + M.model_B.b_oil * log_oil + M.model_B.b_ofz * ofz
-                     + M.model_B.post + M.model_B.b_oil_post * log_oil + M.model_B.b_ofz_post * ofz;
-  const fair_B = Math.exp(log_fair_B);
 
   // Реверсия
   const remaining = Math.exp(-M.gamma * days);
   const dev_A_now = M.current.dev_A / 100;
-  const dev_B_now = M.current.dev_B / 100;
 
   const dev_A_end = dev_A_now * remaining;
-  const dev_B_end = dev_B_now * remaining;
-
   const imoex_A = fair_A * (1 + dev_A_end);
-  const imoex_B = fair_B * (1 + dev_B_end);
 
-  return {{fair_A, fair_B, imoex_A, imoex_B, reversion: (1 - remaining) * 100}};
+  return {{fair_A, imoex_A, reversion: (1 - remaining) * 100}};
 }}
 
 function update() {{
@@ -477,17 +458,12 @@ function update() {{
   const imoex_now = M.current.imoex;
 
   document.getElementById('fair-A').textContent = r.fair_A.toLocaleString('ru-RU', {{maximumFractionDigits: 0}});
-  document.getElementById('fair-B').textContent = r.fair_B.toLocaleString('ru-RU', {{maximumFractionDigits: 0}});
   document.getElementById('imoex-proj-A').textContent = r.imoex_A.toLocaleString('ru-RU', {{maximumFractionDigits: 0}});
-  document.getElementById('imoex-proj-B').textContent = r.imoex_B.toLocaleString('ru-RU', {{maximumFractionDigits: 0}});
 
   const ret_A = (r.imoex_A / imoex_now - 1) * 100;
-  const ret_B = (r.imoex_B / imoex_now - 1) * 100;
 
   document.getElementById('ret-A').textContent = (ret_A >= 0 ? '+' : '') + ret_A.toFixed(2) + '%';
   document.getElementById('ret-A').style.color = ret_A >= 0 ? '#2ca02c' : '#d62728';
-  document.getElementById('ret-B').textContent = (ret_B >= 0 ? '+' : '') + ret_B.toFixed(2) + '%';
-  document.getElementById('ret-B').style.color = ret_B >= 0 ? '#2ca02c' : '#d62728';
 
   document.getElementById('reversion').textContent = r.reversion.toFixed(1) + '%';
 }}
