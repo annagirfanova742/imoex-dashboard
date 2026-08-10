@@ -1,0 +1,70 @@
+name: Update IMOEX Dashboard
+
+on:
+  # Ежедневно в 06:00 UTC = 09:00 MSK
+  schedule:
+    - cron: '0 6 * * *'
+  # Ручной запуск через GitHub UI
+  workflow_dispatch:
+  # При push в main тоже пересобираем (для проверки)
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/**'
+      - '.github/workflows/update.yml'
+      - 'requirements.txt'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run pipeline
+        env:
+          WORKDIR: ${{ github.workspace }}/data
+        run: python scripts/run_pipeline.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ index.html || true
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "chore: daily update $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
